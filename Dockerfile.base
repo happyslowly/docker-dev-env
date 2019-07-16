@@ -1,0 +1,44 @@
+from archlinux/base
+
+# install packages
+run pacman -Syy
+
+run pacman --noconfirm -S \
+        base base-devel \
+        nodejs npm yarn \
+        python python-pip \
+        jdk8-openjdk \
+        go \
+        zsh git cmake \
+        neovim python-neovim
+
+run pwd
+arg uid=1000
+arg gid=1000
+arg group=developer
+arg user=xixu
+
+run groupadd -g $gid $group
+run useradd -m -u $uid -g $gid $user
+
+user $user
+
+run pwd
+
+# setup vim
+run cd /tmp && \
+        git clone https://github.com/happyslowly/dot.git && \
+        mkdir -p ~/.config/nvim && \
+        cp /tmp/dot/.vimrc ~/.config/nvim/init.vim
+
+run curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+run nvim --headless +PlugInstall +qa
+run cd ~/.vim/plugged/YouCompleteMe && ./install.py --go-completer --ts-completer --clang-completer
+
+# setup zsh
+run git clone https://github.com/happyslowly/zpacker ~/.zpacker && \
+    cp /tmp/dot/.zshrc ~/.zshrc
+run mkdir -p ~/.profiles && cp /tmp/dot/profiles/basic.zsh ~/.profiles/basic.zsh
+run zsh -c 'source ~/.zshrc' && exit
+
